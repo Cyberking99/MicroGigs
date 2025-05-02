@@ -1,0 +1,12 @@
+{
+  "frame": {
+    "version": "1",
+    "name": "MicroGig",
+    "iconUrl": "https://micro-gigs.vercel.app/logo.png",
+    "homeUrl": "https://micro-gigs.vercel.app/",
+    "imageUrl": "https://micro-gigs.vercel.app/logo.png",
+    "buttonTitle": "🚩 Start",
+    "splashImageUrl": "https://micro-gigs.vercel.app/logo.png",
+    "splashBackgroundColor": "#2563EB",
+  }
+}
