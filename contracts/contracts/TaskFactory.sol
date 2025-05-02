@@ -4,19 +4,25 @@ import "./TaskEscrow.sol";
 
 contract TaskFactory {
     address[] public tasks;
+    
     event TaskCreated(address indexed taskAddress, address indexed creator);
 
     function createTask(
-        string memory _descriptionHash, // IPFS hash
-        uint256 _reward,
+    	string memory _title,
+        string memory _description,
+        string memory _category,
         uint256 _deadline
     ) external payable returns (address) {
-        require(msg.value == _reward, "Deposit must match reward");
+        require(msg.value > 0, "Reward cannot be empty.");
+        
+        uint256 _reward = msg.value;
         
         TaskEscrow newTask = new TaskEscrow(
             address(this),
             msg.sender,
-            _descriptionHash,
+            _title,
+            _description,
+            _category,
             _reward,
             _deadline
         );

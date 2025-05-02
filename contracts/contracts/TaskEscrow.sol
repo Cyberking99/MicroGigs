@@ -2,10 +2,12 @@
 pragma solidity ^0.8.0;
 
 contract TaskEscrow {
-    address public factory; // Add this
+    address public factory;
     address public taskPoster;
     address public taskCompleter;
-    string public descriptionHash; // IPFS hash
+    string public title;
+    string public description;
+    string public category;
     uint256 public reward;
     uint256 public deadline;
     bool public isCompleted;
@@ -22,13 +24,17 @@ contract TaskEscrow {
     constructor(
         address _factory,
         address _taskPoster,
-        string memory _descriptionHash,
+        string memory _title,
+        string memory _description,
+        string memory _category,
         uint256 _reward,
         uint256 _deadline
     ) {
         factory = _factory;
         taskPoster = _taskPoster;
-        descriptionHash = _descriptionHash;
+        title = _title;
+        description = _description;
+        category = _category;
         reward = _reward;
         deadline = block.timestamp + _deadline;
         status = Status.OPEN;
