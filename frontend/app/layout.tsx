@@ -40,6 +40,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+      <meta name="fc:frame" content='{"version":"next","imageUrl":"https://micro-gigs.vercel.app/placeholder-logo.png","button":{"title":"🚩 Start","action":{"type":"launch_frame","name":"MicroGig","url":"https://micro-gigs.vercel.app","splashImageUrl":"https://micro-gigs.vercel.app/placeholder-logo.png","splashBackgroundColor":"#2563EB"}}}' />
+        </head>
       <body>
         <Providers>{children}</Providers>
       </body>
