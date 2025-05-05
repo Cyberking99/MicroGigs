@@ -25,9 +25,8 @@ export function useAllTasks(factoryAddress: Address) {
     const fetchTasks = async () => {
       try {
         setLoading(true)
-
-        // Get total tasks
-        const allTasks = await publicClient?.readContract({
+        
+        const allTasks: any = await publicClient?.readContract({
           address: factoryAddress,
           abi: TaskFactoryABI,
           functionName: 'getAllTasks',
@@ -46,7 +45,7 @@ export function useAllTasks(factoryAddress: Address) {
               args: [i],
             }) as Address
 
-            const [poster, completer, reward, deadline, description, title, status] = await Promise.all([
+            const [title, poster, completer, reward, deadline, description, status, category] = await Promise.all([
               publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'title' }),
               publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'taskPoster' }),
               publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'taskCompleter' }),
@@ -54,6 +53,7 @@ export function useAllTasks(factoryAddress: Address) {
               publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'deadline' }),
               publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'description' }),
               publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'status' }),
+              publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'category' }),
             ])
 
             return {
@@ -65,6 +65,7 @@ export function useAllTasks(factoryAddress: Address) {
               deadline: deadline as bigint,
               description: description as string,
               status: Number(status),
+              category: category as string,
             }
           })
         )

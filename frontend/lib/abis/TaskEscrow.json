@@ -42,7 +42,14 @@
     },
     {
         "anonymous": false,
-        "inputs": [],
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "reason",
+                "type": "string"
+            }
+        ],
         "name": "DisputeRaised",
         "type": "event"
     },
@@ -69,6 +76,19 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newProgress",
+                "type": "uint256"
+            }
+        ],
+        "name": "ProgressUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": true,
                 "internalType": "address",
                 "name": "completer",
@@ -81,8 +101,54 @@
     {
         "anonymous": false,
         "inputs": [],
+        "name": "TaskCanceled",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint8",
+                "name": "rating",
+                "type": "uint8"
+            }
+        ],
         "name": "TaskCompleted",
         "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "submissionDetails",
+                "type": "string"
+            }
+        ],
+        "name": "TaskSubmitted",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_completer",
+                "type": "address"
+            }
+        ],
+        "name": "applyForTask",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "approveApplication",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
     },
     {
         "inputs": [
@@ -99,12 +165,32 @@
     },
     {
         "inputs": [],
+        "name": "cancelTask",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "category",
         "outputs": [
             {
                 "internalType": "string",
                 "name": "",
                 "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "createdAt",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -151,6 +237,74 @@
     },
     {
         "inputs": [],
+        "name": "getTaskDetails",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "enum TaskEscrow.Status",
+                "name": "",
+                "type": "uint8"
+            },
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            },
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "isCompleted",
         "outputs": [
             {
@@ -177,13 +331,38 @@
     },
     {
         "inputs": [],
+        "name": "progress",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_reason",
+                "type": "string"
+            }
+        ],
         "name": "raiseDispute",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
     },
     {
-        "inputs": [],
+        "inputs": [
+            {
+                "internalType": "uint8",
+                "name": "_rating",
+                "type": "uint8"
+            }
+        ],
         "name": "releasePayment",
         "outputs": [],
         "stateMutability": "nonpayable",
@@ -195,6 +374,11 @@
                 "internalType": "address",
                 "name": "_winner",
                 "type": "address"
+            },
+            {
+                "internalType": "uint8",
+                "name": "_winnerShare",
+                "type": "uint8"
             }
         ],
         "name": "resolveDispute",
@@ -230,6 +414,25 @@
     },
     {
         "inputs": [],
+        "name": "submissionDetails",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_submissionDetails",
+                "type": "string"
+            }
+        ],
         "name": "submitWork",
         "outputs": [],
         "stateMutability": "nonpayable",
@@ -272,6 +475,19 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_progress",
+                "type": "uint256"
+            }
+        ],
+        "name": "updateProgress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {

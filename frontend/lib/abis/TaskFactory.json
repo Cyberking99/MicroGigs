@@ -1,5 +1,10 @@
 [
     {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
@@ -13,10 +18,66 @@
                 "internalType": "address",
                 "name": "creator",
                 "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "category",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "reward",
+                "type": "uint256"
             }
         ],
         "name": "TaskCreated",
         "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "task",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "action",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "amount",
+                "type": "int256"
+            }
+        ],
+        "name": "TransactionRecorded",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_taskAddress",
+                "type": "address"
+            }
+        ],
+        "name": "applyForTask",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
     },
     {
         "inputs": [
@@ -68,6 +129,140 @@
     {
         "inputs": [
             {
+                "internalType": "string",
+                "name": "_category",
+                "type": "string"
+            }
+        ],
+        "name": "getTasksByCategory",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getUserAssignedTasks",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getUserPostedTasks",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getUserProfile",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "memberSince",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tasksCompleted",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tasksPosted",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalEarned",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalSpent",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint8",
+                "name": "averageRating",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "ratingsCount",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_taskPoster",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_taskCompleter",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_reward",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint8",
+                "name": "_rating",
+                "type": "uint8"
+            }
+        ],
+        "name": "taskCompleted",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
@@ -83,5 +278,89 @@
         ],
         "stateMutability": "view",
         "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "userAssignedTasks",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "userPostedTasks",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "userRegistry",
+        "outputs": [
+            {
+                "internalType": "contract UserRegistry",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "userTransactionCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "receive"
     }
 ]
