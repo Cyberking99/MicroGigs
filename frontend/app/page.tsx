@@ -203,7 +203,7 @@ export default function MicroGigs() {
       refreshAssignedTasks()
       refreshProfile()
     }
-  }, 10000);
+  }, 5000);
 
   const filteredTasks = selectedCategory === "all" ? tasks : tasks.filter((task) => task.category === selectedCategory)
   // console.log(tasks);
