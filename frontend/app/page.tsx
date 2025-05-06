@@ -168,6 +168,7 @@ export default function MicroGigs() {
   };
 
   const handleSubmitWork = (taskAddress: any) => {
+    console.log("Submitting work for task:", taskAddress)
     if (workSubmission.trim()) {
       submitWork(taskAddress, workSubmission);
       if (isSuccessSubmit) {
@@ -435,7 +436,7 @@ export default function MicroGigs() {
                     {taskStatus(task.status) === "SUBMITTED" && task.poster == address && (
                       <div className="mt-2 flex justify-end">
                         <button
-                          onClick={() => setShowSubmitWork(true)}
+                          onClick={() => setShowSubmittedWork(true)}
                           className="text-xs bg-green-600 hover:bg-green-700 px-2 py-1 rounded"
                         >
                           Approve & Pay
@@ -494,8 +495,8 @@ export default function MicroGigs() {
                         </div>
                         <button
                           onClick={() => {
-                            setShowSubmitWork(true)
                             setSelectedTask((task as any))
+                            setShowSubmitWork(true)
                           }}
                           className="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded"
                         >
@@ -731,7 +732,6 @@ export default function MicroGigs() {
                   <button
                     onClick={() => {
                       setShowSubmitWork(true)
-                      setSelectedTask(null)
                     }}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md text-sm"
                   >

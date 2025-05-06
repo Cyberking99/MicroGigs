@@ -52,6 +52,16 @@ export function useSubmitWorkHook(userAddress?: Address) {
         return;
     }
 
+    if (!taskAddress) {
+      toast.error("Please select a task to submit proof.");
+      return;
+    }
+
+    if (!submissionDetails) {
+      toast.error("Please provide submission details.");
+      return;
+    }
+
     toast.loading("Submitting proof...");
     await writeContract({
       address: taskAddress,
