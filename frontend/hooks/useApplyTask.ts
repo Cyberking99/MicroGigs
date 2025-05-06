@@ -3,8 +3,11 @@ import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { toast } from "react-hot-toast";
 import TaskFactoryABI from "@/lib/abis/TaskFactory.json";
 import { Address } from "viem";
+import { useAllTasks } from './useGetAllTasks';
+import { useAssignedTasks } from './useGetUserAssignedTasks';
+import { useGetUserProfile } from './useGetUserProfile';
 
-export function useApplyTaskHook() {
+export function useApplyTaskHook(userAddress?: Address) {
   const { data: hash, writeContract, isPending, error: writeError } = useWriteContract();
   const {
     isLoading: isConfirming,
@@ -12,8 +15,13 @@ export function useApplyTaskHook() {
     isError,
     error: receiptError,
   } = useWaitForTransactionReceipt({ hash });
-
+  
   const factoryAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as Address;
+
+  const { refreshAllTasks } = useAllTasks(factoryAddress);
+    const { refreshAssignedTasks } = useAssignedTasks(factoryAddress, userAddress);
+    const { refreshProfile } = useGetUserProfile(userAddress);
+
 
   const toastIdRef = useRef<string | undefined>(undefined);
 
@@ -21,6 +29,9 @@ export function useApplyTaskHook() {
     if (isSuccess) {
       toast.dismiss(toastIdRef.current);
       toast.success("Successfully applied for the task!");
+      refreshAllTasks();
+      refreshAssignedTasks();
+      refreshProfile();
     } else if (isError && receiptError) {
         toast.dismiss(toastIdRef.current);
       toast.error(`Transaction failed: ${receiptError.message}`);
@@ -35,9 +46,14 @@ export function useApplyTaskHook() {
     }
   }, [writeError]);
 
-  const applyTask = (taskAddress: Address) => {
+  const applyTask = async (taskAddress: Address) => {
+    if (!userAddress) {
+      toast.error("Please connect your wallet to apply for a task.");
+      return;
+    }
+
     toast.loading("Applying...");
-    writeContract({
+    await writeContract({
       address: factoryAddress,
       abi: TaskFactoryABI,
       functionName: "applyForTask",

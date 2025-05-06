@@ -6,17 +6,6 @@ import { Plus, Check, ArrowRight, X, Filter, Award, Send, User } from "lucide-re
 import { useMiniKit, useAddFrame, useOpenUrl } from "@coinbase/onchainkit/minikit"
 import { Name, Identity, Address, Avatar, EthBalance } from "@coinbase/onchainkit/identity"
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownDisconnect } from "@coinbase/onchainkit/wallet"
-import {
-  Transaction,
-  TransactionButton,
-  TransactionToast,
-  TransactionToastAction,
-  TransactionToastIcon,
-  TransactionToastLabel,
-  TransactionStatusAction,
-  TransactionStatusLabel,
-  TransactionStatus,
-} from "@coinbase/onchainkit/transaction"
 import { toast } from "react-hot-toast";
 import { convertDate, taskStatus } from "@/lib/utils"
 import { useNotification } from "@coinbase/onchainkit/minikit"
@@ -28,34 +17,58 @@ import { useApplyTaskHook } from "@/hooks/useApplyTask";
 import { useGetUserProfile } from "@/hooks/useGetUserProfile";
 import { useSubmitWorkHook } from "@/hooks/useSubmitWork";
 import { useApproveWorkHook } from "@/hooks/useApproveWork";
+import { MicroGigsLogo } from "../components/logo"
+import { SplashScreen } from "../components/splash-screen"
 
+interface Task {
+  taskAddress: string;
+  completer?: string;
+  poster?: string;
+  title: string;
+  description: string;
+  reward: number;
+  category: string;
+  deadline: string;
+  status: string;
+  submissionDetails?: string;
+  posterRating?: number;
+}
 
 export default function MicroGigs() {
+  const [showSplash, setShowSplash] = useState(true)
+
   const { setFrameReady, isFrameReady, context } = useMiniKit()
   const [frameAdded, setFrameAdded] = useState(false)
   const [activeTab, setActiveTab] = useState("browse") // browse, my-tasks, create, profile
   const addFrame = useAddFrame()
   const openUrl = useOpenUrl()
   const sendNotification = useNotification()
+  
   const { address } = useAccount()
-  const { createTask, isPendingCreate, isConfirmingCreate, isSuccessCreate } = useCreateTask(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`);
-  const { tasks, loading, error } = useAllTasks(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`)
-  const { tasksPosted, loadingPostedTasks, errorPostedTasks } = usePostedTasks(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`, address);
-  const { tasksAssigned, loadingAssignedTasks, errorAssignedTasks } = useAssignedTasks(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`, address);
-  const { profile, profileLoading, profileError } = useGetUserProfile(address);
-  const { applyTask, isPendingTask, isSuccessTask, isConfirmingTask } = useApplyTaskHook();
-  const { submitWork, isPendingSubmit, isConfirmingSubmit, isSuccessSubmit } = useSubmitWorkHook();
-  const { approveWork, isPendingApprove, isConfirmingApprove, isSuccessApprove } = useApproveWorkHook();
+  const factoryAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`
+
+  const { createTask, isPendingCreate, isConfirmingCreate, isSuccessCreate } = useCreateTask(factoryAddress,  (address as `0x${string}`) || undefined);
+  const { tasks, loading, error, refreshAllTasks } = useAllTasks(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`)
+  const { tasksPosted, refreshPostedTasks } = usePostedTasks(factoryAddress,  address);
+  const { tasksAssigned, refreshAssignedTasks } = useAssignedTasks(factoryAddress,  address);
+  const { profile, profileLoading, profileError, refreshProfile } = useGetUserProfile(address);
+  const { applyTask, isPendingTask, isSuccessTask, isConfirmingTask } = useApplyTaskHook(address);
+  const { submitWork, isPendingSubmit, isConfirmingSubmit, isSuccessSubmit } = useSubmitWorkHook(address);
+  const { approveWork, isPendingApprove, isConfirmingApprove, isSuccessApprove } = useApproveWorkHook(address);
 
   const [connected, setConnected] = useState(false)
-  const [walletBalance, setWalletBalance] = useState("0.45")
-  const [selectedTask, setSelectedTask] = useState(null)
+  
+  const [myTasks, setMyTasks] = useState(tasksPosted)
+  const [myAssignedTasks, setMyAssignedTasks] = useState(tasksAssigned)
+  
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
+  const [categories] = useState(["all", "design", "development", "content", "marketing"])
   const [selectedCategory, setSelectedCategory] = useState("all")
+  
   const [showSubmitWork, setShowSubmitWork] = useState(false)
   const [showSubmittedWork, setShowSubmittedWork] = useState(false)
   const [workSubmission, setWorkSubmission] = useState("")
-  const [categories] = useState(["all", "design", "development", "content", "marketing"])
 
   useEffect(() => {
     if (!isFrameReady) {
@@ -93,24 +106,6 @@ export default function MicroGigs() {
     return null
   }, [context, frameAdded, handleAddFrame])
 
-  const handleTransactionSuccess = useCallback(
-    async (response: any) => {
-      const transactionHash = response.transactionReceipts[0].transactionHash
-      console.log(`Transaction successful: ${transactionHash}`)
-
-      await sendNotification({
-        title: "Transaction Successful!",
-        body: `Your transaction was completed: ${transactionHash.substring(0, 10)}...`,
-      })
-
-      setWalletBalance((prev) => (Number.parseFloat(prev) - 0.001).toFixed(3))
-    },
-    [sendNotification],
-  )
-
-  const [myTasks, setMyTasks] = useState(tasksPosted)
-  const [myAssignedTasks, setMyAssignedTasks] = useState(tasksAssigned)
-
   useEffect(() => {
     setMyTasks(tasksPosted)
     setMyAssignedTasks(tasksAssigned)
@@ -123,17 +118,13 @@ export default function MicroGigs() {
   const [newTaskDeadline, setNewTaskDeadline] = useState("")
   const [taskRating, setTaskRating] = useState(1)
 
-  const [transactions] = useState([
-    { type: "Task Completed", name: "Community Management", amount: "+0.1 ETH", timestamp: "2 days ago" },
-    { type: "Task Created", name: "Create NFT Collection", amount: "-0.15 ETH", timestamp: "1 week ago" },
-    { type: "Deposit", name: "Wallet Funding", amount: "+0.5 ETH", timestamp: "2 weeks ago" },
-  ])
+  // const [transactions] = useState([
+  //   { type: "Task Completed", name: "Community Management", amount: "+0.1 ETH", timestamp: "2 days ago" },
+  //   { type: "Task Created", name: "Create NFT Collection", amount: "-0.15 ETH", timestamp: "1 week ago" },
+  //   { type: "Deposit", name: "Wallet Funding", amount: "+0.5 ETH", timestamp: "2 weeks ago" },
+  // ])
 
-  const handleApply = (taskAddress: any) => {
-    console.log(taskAddress);
-  }
-
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (
       newTaskTitle.trim() &&
       newTaskBudget.trim() &&
@@ -146,7 +137,7 @@ export default function MicroGigs() {
       const deadlineInSeconds = deadlineInDays * 86400;
   
       try {
-        createTask({
+        await createTask({
           title: newTaskTitle,
           description: newTaskDescription,
           category: newTaskCategory,
@@ -164,6 +155,9 @@ export default function MicroGigs() {
           setNewTaskCategory("");
           setNewTaskDescription("");
           setNewTaskDeadline("");
+
+          // refreshProfile();
+          // refreshAllTasks();
       } catch (err) {
         console.error("Error creating task:", err);
         toast.error("An error occurred while submitting the task.");
@@ -172,7 +166,6 @@ export default function MicroGigs() {
       toast.error("Please fill in all fields before submitting.");
     }
   };
-  
 
   const handleSubmitWork = (taskAddress: any) => {
     if (workSubmission.trim()) {
@@ -203,20 +196,32 @@ export default function MicroGigs() {
     }
   }, [address])
 
+  setInterval(() => {
+    if(address && factoryAddress) {
+      refreshPostedTasks()
+      refreshAssignedTasks()
+      refreshProfile()
+    }
+  }, 10000);
+
   const filteredTasks = selectedCategory === "all" ? tasks : tasks.filter((task) => task.category === selectedCategory)
-  console.log(tasks);
-  console.log(profile);
-  console.log(myTasks);
+  // console.log(tasks);
+  // console.log(profile);
+  // console.log(myTasks);
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />
+  }
 
   if (!connected) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
         <div className="w-full max-w-md p-6">
-          <Wallet className="z-10">
-            <ConnectWallet>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md mb-8">
+          <Wallet className="z-10 mb-6 flex items-center">
+            <ConnectWallet className="flex items-center">
+              <span className="w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-medium py-2 px-4 rounded-md mb-8">
                 Connect Wallet
-              </button>
+              </span>
             </ConnectWallet>
           </Wallet>
 
@@ -226,25 +231,30 @@ export default function MicroGigs() {
             </div>
             <div className="p-4">
               <p className="text-sm text-zinc-400 mb-4">
-                A decentralized marketplace for small tasks built with blockchain technology.
+                A decentralized marketplace for small tasks.
               </p>
-              <button className="flex items-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md">
+              {/* <span className="flex items-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md">
                 <ArrowRight className="w-4 h-4 mr-2" />
                 Explore Features
-              </button>
+              </span> */}
             </div>
           </div>
 
           <div className="border border-zinc-800 rounded-lg mb-6">
             <div className="border-b border-zinc-800 p-4">
-              <h2 className="text-lg font-medium">Make Your First Transaction</h2>
+              <h2 className="text-lg font-medium">Features</h2>
             </div>
             <div className="p-4">
               <p className="text-sm text-zinc-400 mb-4">
                 Experience the power of seamless blockchain transactions with secure smart contract escrow.
               </p>
+              <ul className="list-disc list-inside mb-4">
+                <li className="text-sm text-zinc-400">Create and fund tasks with ease.</li>
+                <li className="text-sm text-zinc-400">Apply for tasks and get paid securely.</li>
+                <li className="text-sm text-zinc-400">Rate and review your experience.</li>
+              </ul>
               <button className="text-amber-500 hover:text-amber-400 text-sm font-medium">
-                Connect your wallet to send a transaction
+                Connect your wallet to get started
               </button>
             </div>
           </div>
@@ -338,11 +348,13 @@ export default function MicroGigs() {
 
               <div className="space-y-3">
                 {filteredTasks.map((task) => (
+                  <>
+                  {taskStatus(task.status) === "OPEN" && (
                   <div
                     key={task.taskAddress}
                     className="flex items-center justify-between border-b border-zinc-800 pb-3 last:border-0 last:pb-0"
                   >
-                    <div className="cursor-pointer flex-1" onClick={() => setSelectedTask(task)}>
+                    <div className="cursor-pointer flex-1" onClick={() => setSelectedTask((task as any))}>
                       <div className="font-medium text-sm">{task.title}</div>
                       <div className="flex items-center gap-2">
                         <div className="text-xs text-zinc-400">{Number(task.reward.toString()) / 10e18} ETH</div>
@@ -351,14 +363,16 @@ export default function MicroGigs() {
                         </div>
                       </div>
                     </div>
-                    <button
+                    {/* <button
                       onClick={() => handleApply(task.taskAddress)}
                       className={`flex items-center justify-center w-8 h-8 rounded-full ${taskStatus(task.status) == "COMPLETED" ? "bg-green-900 text-green-500" : "bg-blue-900 text-blue-500"
                         }`}
                     >
                       {task.applied ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                    </button>
+                    </button> */}
                   </div>
+                  )}
+                  </>
                 ))}
               </div>
             </div>
@@ -371,7 +385,7 @@ export default function MicroGigs() {
                   <div key={task.taskAddress} className="border-b border-zinc-800 pb-3 last:border-0 last:pb-0">
                     <div
                       className="flex items-center justify-between cursor-pointer"
-                      onClick={() => setSelectedTask(task)}
+                      onClick={() => setSelectedTask((task as any))}
                     >
                       <div>
                         <div className="font-medium text-sm">{task.title}</div>
@@ -441,7 +455,7 @@ export default function MicroGigs() {
                   <div key={task.taskAddress} className="border-b border-zinc-800 pb-3 last:border-0 last:pb-0">
                     <div
                       className="flex items-center justify-between cursor-pointer"
-                      onClick={() => setSelectedTask(task)}
+                      onClick={() => setSelectedTask((task as any))}
                     >
                       <div>
                         <div className="font-medium text-sm">{task.title}</div>
@@ -632,35 +646,13 @@ export default function MicroGigs() {
           )}
         </div>
 
-        <div className="border border-zinc-800 rounded-lg mb-6">
-          <div className="border-b border-zinc-800 p-4">
-            <h2 className="text-lg font-medium">Transaction History</h2>
-          </div>
-          <div className="p-4">
-            <div className="space-y-3">
-              {transactions.map((tx, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-sm">{tx.type}</div>
-                    <div className="text-xs text-zinc-400">{tx.name}</div>
-                    <div className="text-xs text-zinc-500">{tx.timestamp}</div>
-                  </div>
-                  <div className={`text-sm ${tx.amount.startsWith("+") ? "text-green-500" : "text-red-500"}`}>
-                    {tx.amount}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
         <div className="text-center text-xs text-zinc-500 mt-4">Built on Base with MiniKit</div>
       </div>
 
       {/* Task Detail Modal */}
       {selectedTask && (
         <>
-        {console.log("Completer:", selectedTask.completer, "Current Address:", address)}
+        {/* {console.log("Completer:", selectedTask.completer, "Current Address:", address)} */}
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50">
           <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-lg">
             <div className="border-b border-zinc-800 p-4 flex justify-between items-center">
@@ -697,7 +689,7 @@ export default function MicroGigs() {
                 </div>
               </div>
 
-              {taskStatus(selectedTask.status) === "ASSIGNED" && (
+              {taskStatus(Number(selectedTask.status)) === "ASSIGNED" && (
                 <div>
                   {/* <div className="text-xs text-zinc-400 mb-1">Progress</div> */}
                   <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
@@ -710,7 +702,7 @@ export default function MicroGigs() {
                 </div>
               )}
 
-              {taskStatus(selectedTask.status) === "COMPLETED" && (
+              {taskStatus(Number(selectedTask.status)) === "COMPLETED" && (
                 <div className="bg-green-900 text-green-500 p-3 rounded-md text-center text-sm">
                   This task has been completed
                 </div>
@@ -723,11 +715,10 @@ export default function MicroGigs() {
               )} */}
 
               <div className="flex justify-end pt-2">
-                {taskStatus(selectedTask.status) === "OPEN" && selectedTask.poster !== address && (
+                {taskStatus(Number(selectedTask.status)) === "OPEN" && selectedTask.poster !== address && (
                   <button
                     onClick={() => {
-                      applyTask(selectedTask.taskAddress);
-                      // setSelectedTask(null);
+                      applyTask((selectedTask.taskAddress as any));
                     }}
                     disabled={isPendingTask || isConfirmingTask}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md text-sm"
@@ -736,7 +727,7 @@ export default function MicroGigs() {
                   </button>
                 )}
 
-                {(taskStatus(selectedTask.status) === "ASSIGNED" || taskStatus(selectedTask.status) === "IN_PROGRESS" ) && selectedTask.completer == address && (
+                {(taskStatus(Number(selectedTask.status)) === "ASSIGNED" || taskStatus(Number(selectedTask.status)) === "IN_PROGRESS" ) && selectedTask.completer == address && (
                   <button
                     onClick={() => {
                       setShowSubmitWork(true)
@@ -794,7 +785,7 @@ export default function MicroGigs() {
                   value={taskRating}
                   max="5"
                   min="1"
-                  onChange={(e) => setTaskRating(e.target.value)}
+                  onChange={(e) => setTaskRating(Number(e.target.value))}
                   placeholder="Rate the task between 1-5"
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-md px-3 py-2 text-sm"
                 />
@@ -807,10 +798,10 @@ export default function MicroGigs() {
                 >
                   Close
                 </button>
-                {taskStatus(selectedTask.status) === "SUBMITTED" && selectedTask.poster == address && (
+                {taskStatus(Number(selectedTask?.status)) === "SUBMITTED" && selectedTask?.poster == address && (
                   <div className="mt-2 flex justify-end">
                     <button
-                      onClick={() => handleApproveWork(selectedTask.taskAddress)}
+                      onClick={() => handleApproveWork(selectedTask?.taskAddress)}
                       disabled={isPendingApprove || isConfirmingApprove}
                       className="text-xs bg-green-600 hover:bg-green-700 px-2 py-1 rounded"
                     >
@@ -855,7 +846,7 @@ export default function MicroGigs() {
                 </button>
                 <button
                   onClick={() => {
-                    handleSubmitWork(selectedTask.taskAddress)
+                    handleSubmitWork(selectedTask?.taskAddress)
                   }}
                   disabled={isPendingSubmit || isConfirmingSubmit}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md text-sm flex items-center"

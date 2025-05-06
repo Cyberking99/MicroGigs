@@ -12,8 +12,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL;
   return {
     title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
-    description:
-      "Decentralized Gig Marketplace",
+    description: "Decentralized Gig Marketplace",
+      icons: {
+        icon: "/favicon.ico",
+      },
     other: {
       "fc:frame": JSON.stringify({
         version: process.env.NEXT_PUBLIC_VERSION,
@@ -41,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-      <meta name="fc:frame" content='{"version":"next","imageUrl":"https://micro-gigs.vercel.app/placeholder-logo.png","button":{"title":"🚩 Start","action":{"type":"launch_frame","name":"MicroGig","url":"https://micro-gigs.vercel.app","splashImageUrl":"https://micro-gigs.vercel.app/placeholder-logo.png","splashBackgroundColor":"#2563EB"}}}' />
+      <meta name="fc:frame" content='{"version":"next","imageUrl":"https://micro-gigs.vercel.app/image.png","button":{"title":"🚩 Start","action":{"type":"launch_frame","name":"MicroGig","url":"https://micro-gigs.vercel.app","splashImageUrl":"https://micro-gigs.vercel.app/splash.png","splashBackgroundColor":"#2563EB"}}}' />
         </head>
       <body>
         <Providers>{children}</Providers>

@@ -35,7 +35,7 @@ export function useAssignedTasks(factoryAddress: Address, userAddress: Address |
         )
 
         // Get logs from the factory contract
-        const logs = await publicClient.getLogs({
+        const logs = await publicClient?.getLogs({
           address: factoryAddress,
           event: taskAssignedEvent,
           args: {
@@ -46,36 +46,7 @@ export function useAssignedTasks(factoryAddress: Address, userAddress: Address |
         })
 
         // Extract task addresses
-        const taskAddresses: Address[] = logs.map(
-          log => (log.args as any).taskAddress
-        )
-
-        const fetchedTasks = await Promise.all(
-          taskAddresses.map(async (taskAddress) => {
-            const [title, poster, completer, reward, deadline, description, status] = await Promise.all([
-              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'title' }),
-              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'taskPoster' }),
-              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'taskCompleter' }),
-              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'reward' }),
-              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'deadline' }),
-              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'description' }),
-              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'status' }),
-            ])
-
-            return {
-              taskAddress,
-              title: title as string,
-              poster: poster as Address,
-              completer: completer as Address,
-              reward: reward as bigint,
-              deadline: deadline as bigint,
-              description: description as string,
-              status: Number(status),
-            }
-          })
-        )
-
-        setTasks(fetchedTasks)
+        console.log('Fetched logs:', logs)
       } catch (err: any) {
         console.error(err)
         setError(err.message || 'Failed to fetch tasks')

@@ -13,13 +13,12 @@
     "homeUrl": "https://micro-gigs.vercel.app",
     "imageUrl": "https://micro-gigs.vercel.app/logo.png",
     "buttonTitle": "🚩 Start",
-    "webhookUrl": "https://client.warpcast.com/v1/creator-rewards-notifs-webhook",
     "subtitle": "Decentralized task marketplace",
     "description": "Earn crypto by completing tasks for creators.",
     "screenshotUrls": [
-      "https://rewards.warpcast.com/screenshot1.png",
-      "https://rewards.warpcast.com/screenshot2.png",
-      "https://rewards.warpcast.com/screenshot3.png"
+      "https://micro-gigs.vercel.app/screenshot1.png",
+      "https://micro-gigs.vercel.app/screenshot2.png",
+      "https://micro-gigs.vercel.app/screenshot3.png"
     ],
     "primaryCategory": "social",
     "tags": [
@@ -28,10 +27,10 @@
       "warpcast",
       "earn"
     ],
-    "heroImageUrl": "https://rewards.warpcast.com/og.png",
+    "heroImageUrl": "https://micro-gigs.vercel.app/og.png",
     "tagline": "Decentralized task marketplace",
     "ogTitle": "MicroGig",
     "ogDescription": "Earn crypto by completing tasks for creators.",
-    "ogImageUrl": "https://rewards.warpcast.com/og.png"
+    "ogImageUrl": "https://micro-gigs.vercel.app/og.png"
   }
 }

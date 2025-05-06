@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { usePublicClient } from 'wagmi'
+import { useEffect, useMemo, useState } from 'react'
+import { usePublicClient, useReadContract } from 'wagmi'
 import { Address } from 'viem'
 import TaskFactoryABI from '@/lib/abis/TaskFactory.json'
 import TaskEscrowABI from '@/lib/abis/TaskEscrow.json'
@@ -13,6 +13,8 @@ export interface Task {
   title: string
   description: string
   status: number
+  category?: string
+  submissionDetails?: string
 }
 
 export function useAllTasks(factoryAddress: Address) {
@@ -21,66 +23,73 @@ export function useAllTasks(factoryAddress: Address) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const { data, isError, isLoading, refetch } = useReadContract({
+    address: factoryAddress,
+    abi: TaskFactoryABI,
+    functionName: 'getAllTasks',
+    query: { enabled: !!factoryAddress },
+  } as const)
+
+  const fetchedTasks = useMemo(() => {
+    if (!data) return []
+    return (data as Address[]).map((taskAddress) => ({ taskAddress }))
+  }, [data])
+
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchTaskDetails = async () => {
+      if (fetchedTasks.length === 0 || !publicClient) return
+
       try {
-        setLoading(true)
-        
-        const allTasks: any = await publicClient?.readContract({
-          address: factoryAddress,
-          abi: TaskFactoryABI,
-          functionName: 'getAllTasks',
-        })
-
-        const totalTasks = allTasks.length;
-
-        const taskCount = Number(totalTasks)
-
-        const fetchedTasks = await Promise.all(
-          Array.from({ length: taskCount }).map(async (_, i) => {
-            const taskAddress = await publicClient?.readContract({
-              address: factoryAddress,
-              abi: TaskFactoryABI,
-              functionName: 'tasks',
-              args: [i],
-            }) as Address
-
+        const detailedTasks = await Promise.all(
+          fetchedTasks.map(async ({ taskAddress }) => {
             const [title, poster, completer, reward, deadline, description, status, category] = await Promise.all([
-              publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'title' }),
-              publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'taskPoster' }),
-              publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'taskCompleter' }),
-              publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'reward' }),
-              publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'deadline' }),
-              publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'description' }),
-              publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'status' }),
-              publicClient?.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'category' }),
+              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'title' }),
+              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'taskPoster' }),
+              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'taskCompleter' }),
+              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'reward' }),
+              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'deadline' }),
+              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'description' }),
+              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'status' }),
+              publicClient.readContract({ address: taskAddress, abi: TaskEscrowABI, functionName: 'category' }),
             ])
 
             return {
               taskAddress,
-              title: title as string,
-              poster: poster as Address,
-              completer: completer as Address,
-              reward: reward as bigint,
-              deadline: deadline as bigint,
-              description: description as string,
-              status: Number(status),
-              category: category as string,
+              title,
+              poster,
+              completer,
+              reward,
+              deadline,
+              description,
+              status,
+              category,
             }
           })
         )
 
-        setTasks(fetchedTasks)
-      } catch (err: any) {
+        setTasks(detailedTasks as Task[])
+        setError(null)
+      } catch (err) {
         console.error(err)
-        setError(err.message || 'Failed to fetch tasks')
+        setError('Failed to fetch task details')
       } finally {
         setLoading(false)
       }
     }
 
-    fetchTasks()
-  }, [factoryAddress, publicClient])
+    if (!isLoading && !isError) {
+      setLoading(true)
+      fetchTaskDetails()
+    } else if (isError) {
+      setTasks([])
+      setError('Failed to fetch tasks')
+      setLoading(false)
+    }
+  }, [isLoading, isError, fetchedTasks, publicClient])
 
-  return { tasks, loading, error }
+  const refreshAllTasks = () => {
+    if (factoryAddress) refetch()
+  }
+
+  return { tasks, loading, error, taskCount: tasks.length, refreshAllTasks }
 }

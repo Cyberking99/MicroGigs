@@ -20,12 +20,7 @@ export function useGetUserProfile(userAddress: Address | undefined) {
   const [profileLoading, setLoading] = useState<boolean>(true);
   const [profileError, setError] = useState<string | null>(null);
 
-  const { 
-    data: profileData, 
-    isError, 
-    isLoading,
-    refetch
-  } = useReadContract({
+  const contractConfig = {
     address: MICROGIGS_HUB_ADDRESS,
     abi: TaskFactoryABI,
     functionName: 'getUserProfile',
@@ -33,7 +28,16 @@ export function useGetUserProfile(userAddress: Address | undefined) {
     query: {
       enabled: !!userAddress,
     }
-  });
+  } as const;
+
+  const { 
+    data, 
+    isError, 
+    isLoading,
+    refetch
+  } = useReadContract(contractConfig);
+  
+  const profileData = data as readonly [bigint, bigint, bigint, bigint, bigint, bigint, bigint] | undefined;
 
   useEffect(() => {
     if (isLoading) {
@@ -46,8 +50,6 @@ export function useGetUserProfile(userAddress: Address | undefined) {
       setLoading(false);
       setError(null);
       
-      // Process the returned data from the contract
-      // The contract returns a tuple with 7 values
       const formattedProfile: UserProfile = {
         memberSince: profileData[0],
         tasksCompleted: profileData[1],
@@ -62,7 +64,6 @@ export function useGetUserProfile(userAddress: Address | undefined) {
     }
   }, [isLoading, isError, profileData, userAddress]);
 
-  // Refresh the profile data
   const refreshProfile = () => {
     if (userAddress) {
       refetch();
