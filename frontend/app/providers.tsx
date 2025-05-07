@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { http, createConfig } from 'wagmi'
+import { http, createConfig, WagmiProvider } from 'wagmi'
 import { baseSepolia } from "wagmi/chains";
 import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
 import { Toaster } from "react-hot-toast";
@@ -24,8 +24,10 @@ export function Providers(props: { children: ReactNode }) {
         },
       }}
     >
+      <WagmiProvider config={config}>
       {props.children}
       <Toaster position="top-right" />
+      </WagmiProvider>
     </MiniKitProvider>
   );
 }
