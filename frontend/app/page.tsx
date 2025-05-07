@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect, useCallback } from "react"
-import { useAccount } from "wagmi"
+import { useAccount, useConnect } from "wagmi"
 import { Plus, Check, ArrowRight, X, Filter, Award, Send, User } from "lucide-react"
 import { useMiniKit, useAddFrame, useOpenUrl } from "@coinbase/onchainkit/minikit"
 import { Name, Identity, Address, Avatar, EthBalance } from "@coinbase/onchainkit/identity"
@@ -35,6 +35,24 @@ interface Task {
 }
 
 export default function MicroGigs() {
+  const [isFarcasterFrame, setIsFarcasterFrame] = useState(false)
+  const [isEmbedded, setIsEmbedded] = useState(false)
+
+  useEffect(() => {
+    const search = window.location.search
+    const isFC = search.includes('fc_user') || search.includes('frame_id')
+    const isFrame = window !== window.parent
+
+    setIsFarcasterFrame(isFC)
+    setIsEmbedded(isFrame)
+
+    console.log(isFarcasterFrame, isEmbedded);
+    if (isFC || isFrame) {
+      setShowSplash(false) // skip splash for Farcaster Frames
+    }
+  }, [])
+
+
   const [showSplash, setShowSplash] = useState(true)
 
   const { setFrameReady, isFrameReady, context } = useMiniKit()
@@ -44,7 +62,8 @@ export default function MicroGigs() {
   const openUrl = useOpenUrl()
   const sendNotification = useNotification()
   
-  const { address } = useAccount()
+  const { address, isConnected } = useAccount()
+  const { connect, connectors } = useConnect()
   const factoryAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`
 
   const { createTask, isPendingCreate, isConfirmingCreate, isSuccessCreate } = useCreateTask(factoryAddress,  (address as `0x${string}`) || undefined);

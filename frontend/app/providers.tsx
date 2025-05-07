@@ -1,9 +1,11 @@
 "use client";
 
 import { type ReactNode } from "react";
+import { http, createConfig } from 'wagmi'
 import { baseSepolia } from "wagmi/chains";
 import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
 import { Toaster } from "react-hot-toast";
+import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
 
 export function Providers(props: { children: ReactNode }) {
   return (
@@ -27,3 +29,13 @@ export function Providers(props: { children: ReactNode }) {
     </MiniKitProvider>
   );
 }
+
+export const config = createConfig({
+  chains: [baseSepolia],
+  transports: {
+    [baseSepolia.id]: http(),
+  },
+  connectors: [
+    miniAppConnector()
+  ]
+})
