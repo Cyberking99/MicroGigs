@@ -46,7 +46,7 @@ export default function MicroGigs() {
     setIsFarcasterFrame(isFC)
     setIsEmbedded(isFrame)
 
-    console.log(isFarcasterFrame, isEmbedded);
+    console.log(isFC, isFrame);
     if (isFC || isFrame) {
       setShowSplash(false) // skip splash for Farcaster Frames
     }
