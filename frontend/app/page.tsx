@@ -48,7 +48,7 @@ export default function MicroGigs() {
 
     console.log(isFC, isFrame);
     if (isFC || isFrame) {
-      setShowSplash(false) // skip splash for Farcaster Frames
+      setShowSplash(false)
     }
   }, [])
 
@@ -237,6 +237,10 @@ export default function MicroGigs() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
         <div className="w-full max-w-md p-6">
+          <>
+        {(isFarcasterFrame || isEmbedded) ? (
+              <div className="relative w-fit shrink-0 mini-app-theme-dark z-10"><div><div className="flex"><button type="button" onClick={() => connect({ connector: connectors[0] })} className="cursor-pointer ock-bg-primary active:bg-[var(--ock-bg-primary-active)] hover:bg-[var(--ock-bg-primary-hover)] ock-border-radius ock-font-family font-semibold ock-text-inverse inline-flex min-w-[153px] items-center justify-center px-4 py-3"><span className="ock-text-inverse">Connect Wallet</span></button></div></div></div>
+            ) : (
           <Wallet className="z-10 mb-6 flex items-center">
             <ConnectWallet className="flex items-center">
               <span className="w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-medium py-2 px-4 rounded-md mb-8">
@@ -244,6 +248,8 @@ export default function MicroGigs() {
               </span>
             </ConnectWallet>
           </Wallet>
+            )}
+          </>
 
           <div className="border border-zinc-800 rounded-lg mb-6">
             <div className="border-b border-zinc-800 p-4">
@@ -291,6 +297,10 @@ export default function MicroGigs() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-xl font-medium">MicroGigs</h1>
           <div className="flex items-center gap-3">
+            <>
+            {(isFarcasterFrame || isEmbedded) && isConnected ? (
+              <div className="relative w-fit shrink-0 mini-app-theme-dark z-10"><div><div className="flex"><button type="button" onClick={() => connect({ connector: connectors[0] })} className="cursor-pointer ock-bg-primary active:bg-[var(--ock-bg-primary-active)] hover:bg-[var(--ock-bg-primary-hover)] ock-border-radius ock-font-family font-semibold ock-text-inverse inline-flex min-w-[153px] items-center justify-center px-4 py-3"><span className="ock-text-inverse">Connect Wallet</span></button></div></div></div>
+            ) : (
             <Wallet className="z-10">
               <ConnectWallet>
                 <Name className="text-inherit" />
@@ -305,6 +315,8 @@ export default function MicroGigs() {
                 <WalletDropdownDisconnect />
               </WalletDropdown>
             </Wallet>
+            )}
+            </>
           </div>
         </div>
 
