@@ -195,7 +195,7 @@ export default function MicroGigs() {
     if (address) {
       setConnected(true)
     }
-  }, [address])
+  }, [address]);
 
   setInterval(() => {
     if(address && factoryAddress) {
