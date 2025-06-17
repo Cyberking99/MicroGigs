@@ -62,7 +62,7 @@ export function SplashScreen({ onComplete, minDisplayTime = 2000 }: SplashScreen
       </div>
       
       <div className="absolute bottom-8 text-xs text-zinc-600">
-        Powered by Blockchain
+        Powered by Base
       </div>
     </div>
   )
